@@ -14,15 +14,6 @@
         <url-pattern>/lista</url-pattern>
     </servlet-mapping>
 
-	<servlet>
-        <servlet-name>CarrinhoServlet</servlet-name>
-        <servlet-class>com.trabalho.CarrinhoServlet</servlet-class>
-    </servlet>
-    <servlet-mapping>
-        <servlet-name>CarrinhoServlet</servlet-name>
-        <url-pattern>/carrinho</url-pattern>
-    </servlet-mapping>
-
     <servlet>
         <servlet-name>ConfirmacaoServlet</servlet-name>
         <servlet-class>com.trabalho.ConfirmacaoServlet</servlet-class>
