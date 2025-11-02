@@ -16,6 +16,7 @@ public class ConfirmacaoServlet extends HttpServlet {
         res.setContentType("text/html;charset=UTF-8");
         PrintWriter out = res.getWriter();
 
+        @SuppressWarnings("unchecked")
         Map<String, Equipamento> estoque = (Map<String, Equipamento>) 
             req.getServletContext().getAttribute("estoque");
 
@@ -24,7 +25,6 @@ public class ConfirmacaoServlet extends HttpServlet {
         String nomeCliente = req.getParameter("nomeCliente");
         String endereco = req.getParameter("endereco");
         String numeroCartao = req.getParameter("numeroCartao");
-        String totalStr = req.getParameter("total");
 
         String cartaoMascarado = (numeroCartao != null && numeroCartao.matches("\\d{16}"))
             ? "**** **** **** " + numeroCartao.substring(12)
@@ -66,22 +66,15 @@ public class ConfirmacaoServlet extends HttpServlet {
         } else {
             List<ItemCompra> itens = new ArrayList<>();
             double total = 0.0;
-            Enumeration<String> params = req.getParameterNames();
 
-            while (params.hasMoreElements()) {
-                String p = params.nextElement();
-                if (p.equals("idItem")) {
-                    String id = req.getParameter("idItem");
-                    int qtd = Integer.parseInt(req.getParameter("quantidade"));
-                    double sub = Double.parseDouble(req.getParameter("total"));
-                    Equipamento eq = estoque.get(id);
-                    if (eq != null) {
-                        itens.add(new ItemCompra(eq.getNome(), eq.getPreco(), qtd, sub));
-                        total = sub;
-                    }
-                }
+            String id = req.getParameter("idItem");
+            int qtd = Integer.parseInt(req.getParameter("quantidade"));
+            double sub = Double.parseDouble(req.getParameter("total"));
+            Equipamento eq = estoque.get(id);
+            if (eq != null) {
+                itens.add(new ItemCompra(eq.getNome(), eq.getPreco(), qtd, sub));
+                total = sub;
             }
-            if (totalStr != null && !totalStr.isEmpty()) total = Double.parseDouble(totalStr);
 
             out.println("<table class='w-100'><thead><tr><th>QTD</th><th>DESCRIÇÃO</th><th class='text-right'>PREÇO</th><th class='text-right'>TOTAL</th></tr></thead><tbody>");
             for (ItemCompra i : itens) {
