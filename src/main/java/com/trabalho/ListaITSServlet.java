@@ -58,7 +58,7 @@ public class ListaITSServlet extends HttpServlet {
         // META TAGS PARA SEO E PARTILHA
      // === OPEN GRAPH CORRIGIDO PARA WHATSAPP (URL ABSOLUTA + PNG OTIMIZADO) ===
         out.println("<meta property='og:title' content='ITS Shop - Tecnologia em Nampula'>");
-        out.println("<meta property='og:description' content='Loja de TI com 20 produtos, entrega rápida em Moçambique!'>");
+        out.println("<meta property='og:description' content='Loja de TI com produtos trcnologicos, entrega rápida em Moçambique!'>");
         out.println("<meta property='og:image' content='https://itsshop-sd-production.up.railway.app/imagens/preview.png'>");
         out.println("<meta property='og:image:type' content='image/png'>");
         out.println("<meta property='og:image:width' content='1200'>");
