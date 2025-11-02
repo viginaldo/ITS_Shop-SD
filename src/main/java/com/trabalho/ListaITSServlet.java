@@ -4,11 +4,9 @@ import java.io.*;
 import java.util.*;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
-import jakarta.servlet.annotation.WebServlet;
 
-@WebServlet("/lista")
 public class ListaITSServlet extends HttpServlet {
-    Map<String, Equipamento> estoque = new HashMap<>();
+    private Map<String, Equipamento> estoque = new HashMap<>();
 
     @Override
     public void init() throws ServletException {
@@ -32,6 +30,7 @@ public class ListaITSServlet extends HttpServlet {
         estoque.put("18", new Equipamento("18", "Pen Drive 128GB USB 3.0 (SanDisk)", 800.00));
         estoque.put("19", new Equipamento("19", "Power Bank 10000mAh (Anker ou Xiaomi)", 1200.00));
         estoque.put("20", new Equipamento("20", "Hub USB 3.0 4 Portas (Anker)", 900.00));
+        System.out.println("ESTOQUE INICIALIZADO: " + estoque.size() + " itens");
     }
 
     @Override
@@ -39,79 +38,189 @@ public class ListaITSServlet extends HttpServlet {
             throws ServletException, IOException {
         res.setContentType("text/html;charset=UTF-8");
         PrintWriter out = res.getWriter();
-        String contextPath = req.getContextPath();
 
         if (estoque.isEmpty()) init();
+        String contextPath = req.getContextPath();
 
         out.println("<!DOCTYPE html><html lang='pt'><head>");
-        out.println("<meta charset='UTF-8'><title>ITS Shop | Catálogo</title>");
+        out.println("<meta charset='UTF-8'>");
+        out.println("<title>ITS Shop | Catálogo</title>");
+        out.println("<link rel='icon' href='" + contextPath + "/imagens/favicons/favicon.ico' type='image/x-icon'>");
+        out.println("<link rel='apple-touch-icon' href='" + contextPath + "/imagens/favicons/favicon.png'>");
+
+        // Open Graph (Preview no WhatsApp)
+        out.println("<meta property='og:title' content='ITS Shop - Tecnologia em Nampula'>");
+        out.println("<meta property='og:description' content='Loja de TI com produtos tecnológicos, entrega rápida em Moçambique!'>");
+        out.println("<meta property='og:image' content='https://itsshop-sd-production.up.railway.app/imagens/preview.png'>");
+        out.println("<meta property='og:image:type' content='image/png'>");
+        out.println("<meta property='og:image:width' content='1200'>");
+        out.println("<meta property='og:image:height' content='630'>");
+        out.println("<meta property='og:url' content='https://itsshop-sd-production.up.railway.app'>");
+        out.println("<meta property='og:type' content='website'>");
+        out.println("<meta property='og:locale' content='pt_MZ'>");
+
+        out.println("<meta name='twitter:card' content='summary_large_image'>");
+        out.println("<meta name='twitter:title' content='ITS Shop - Tecnologia em Nampula'>");
+        out.println("<meta name='twitter:description' content='Compre laptops, smartphones e acessórios com entrega rápida!'>");
+        out.println("<meta name='twitter:image' content='https://itsshop-sd-production.up.railway.app/imagens/preview.png'>");
+
         out.println("<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>");
         out.println("<link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css' rel='stylesheet'>");
-        out.println("<style>.card-img-top{height:200px;object-fit:contain;}</style>");
+        out.println("<style>body{background:#f8f9fa;} .card-img-top{height:200px;object-fit:contain;}</style>");
         out.println("</head><body>");
 
-        // NAVBAR
-        out.println("<nav class='navbar navbar-dark bg-dark fixed-top'>");
-        out.println("<div class='container-fluid d-flex justify-content-between'>");
-        out.println("<a class='btn btn-outline-light' href='" + contextPath + "/index.html'>Sair</a>");
-        out.println("<a class='navbar-brand mx-auto' href='#'>ITS Shop</a>");
-        out.println("<a class='btn btn-outline-light' href='#about'>About Us</a>");
-        out.println("</div></nav>");
-        out.println("<div style='height:70px;'></div>");
+        // === NAVBAR COM CONTADOR ===
+        out.println("<nav class='navbar navbar-dark bg-dark fixed-top shadow-sm'>");
+        out.println("<div class='container-fluid d-flex justify-content-between align-items-center'>");
+        out.println("<a class='btn btn-outline-light' href='" + contextPath + "/index.html'><i class='fas613 fa-sign-out-alt'></i> Sair</a>");
+        out.println("<a class='navbar-brand position-absolute start-50 translate-middle-x' href='#about'>");
+        out.println("<img src='" + contextPath + "/imagens/logo.png' alt='ITS Shop Logo' height='40' class='me-2'>ITS Shop</a>");
+        out.println("<a class='btn btn-outline-light position-relative' href='#' onclick='abrirCarrinho()'>");
+        out.println("<i class='fas fa-shopping-cart'></i>");
+        out.println("<span class='position-absolute top-0 start-100 translate-middle badge rounded-pill bg-danger' id='cart-count'>0</span>");
+        out.println("</a></div></nav>");
+
+        out.println("<div style='height: 80px;'></div>");
 
         out.println("<div class='container py-5'>");
-        out.println("<h2 class='text-center mb-5'>Catálogo de Equipamentos</h2>");
-        out.println("<div class='row row-cols-1 row-cols-md-3 g-4'>");
+        out.println("<h2 class='text-center mb-5 text-success'><i class='fas fa-laptop'></i> Catálogo de Equipamentos</h2>");
+        out.println("<div class='row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4'>");
 
+        // === PRODUTOS COM ÍCONE NO TOPO ===
         for (Equipamento e : estoque.values()) {
-            String img = "imagens/" + e.getId() + ".jpg";
+            String imagem = switch (e.getId()) {
+                case "1"  -> "imagens/pc.jpg";
+                case "2"  -> "imagens/monitor.jpg";
+                case "3"  -> "imagens/teclado.jpg";
+                case "4"  -> "imagens/mouse.jpg";
+                case "5"  -> "imagens/dell.jpg";
+                case "6"  -> "imagens/A54.jpg";
+                case "7"  -> "imagens/Impressora.jpg";
+                case "8"  -> "imagens/Webcam.jpg";
+                case "9"  -> "imagens/lenovo.jpg";
+                case "10" -> "imagens/Headset.jpg";
+                case "11" -> "imagens/SSD.jpg";
+                case "12" -> "imagens/RAM.jpg";
+                case "13" -> "imagens/iPhone13.jpg";
+                case "14" -> "imagens/ImpressoraL.jpg";
+                case "15" -> "imagens/Tablet.jpg";
+                case "16" -> "imagens/Desktop.jpg";
+                case "17" -> "imagens/camera.jpg";
+                case "18" -> "imagens/PenD.jpg";
+                case "19" -> "imagens/Power.jpg";
+                case "20" -> "imagens/Hub.jpg";
+                default -> "https://via.placeholder.com/300x200";
+            };
+
             out.println("<div class='col'>");
-            out.println("<div class='card h-100 position-relative'>");
-            out.println("<button class='btn btn-sm position-absolute top-0 end-0 m-2' style='background:white;' onclick=\"addToCart('" + e.getId() + "')\">");
-            out.println("<i class='fas fa-cart-plus text-success' id='icon-" + e.getId() + "'></i></button>");
-            out.println("<img src='" + contextPath + "/" + img + "' class='card-img-top' alt='" + e.getNome() + "'>");
+            out.println("<div class='card h-100 shadow-sm position-relative'>");
+
+            // ÍCONE NO TOPO (toggle add/remove)
+            out.println("<button class='btn btn-sm position-absolute top-0 end-0 m-2 z-3' style='background:#fff; border:1px solid #ddd;' ");
+            out.println("onclick=\"toggleCart('" + e.getId() + "')\" title='Adicionar ao carrinho'>");
+            out.println("<i class='fas fa-cart-plus text-success' id='cart-icon-" + e.getId() + "'></i></button>");
+
+            out.println("<img src='" + contextPath + "/" + imagem + "' class='card-img-top' alt='" + e.getNome() + "'>");
             out.println("<div class='card-body d-flex flex-column'>");
             out.println("<h5 class='card-title'>" + e.getNome() + "</h5>");
-            out.println("<p class='card-text text-success fw-bold'>" + e.getPreco() + " MT</p>");
-            out.println("<a href='/carrinho?id=" + e.getId() + "' class='btn btn-success mt-auto'>Comprar</a>");
+            out.println("<p class='card-text text-success fw-bold'>Preço: " + e.getPreco() + " MT</p>");
+            out.println("<button type='button' class='btn btn-success w-100 mt-auto' onclick=\"abrirCarrinho('" + e.getId() + "','" + e.getNome() + "','" + e.getPreco() + "','" + imagem + "')\">");
+            out.println("<i class='fas fa-shopping-cart'></i> Comprar</button>");
             out.println("</div></div></div>");
         }
 
         out.println("</div></div>");
 
-        // CARRINHO FLUTUANTE
-        out.println("<a href='/carrinho' class='btn btn-primary rounded-circle position-fixed' style='bottom:30px;right:30px;width:60px;height:60px;z-index:1000;'>");
-        out.println("<i class='fas fa-shopping-cart fs-4'></i>");
-        out.println("<span class='badge bg-danger position-absolute top-0 start-100 translate-middle' id='cart-count'>0</span>");
-        out.println("</a>");
+        // === OFFCANVAS CARRINHO ===
+        out.println("<div class='offcanvas offcanvas-end' tabindex='-1' id='carrinho' aria-labelledby='carrinhoLabel'>");
+        out.println("<div class='offcanvas-header'><h5 class='offcanvas-title' id='carrinhoLabel'>Carrinho de Compras</h5>");
+        out.println("<button type='button' class='btn-close' data-bs-dismiss='offcanvas'></button></div>");
+        out.println("<div class='offcanvas-body' id='carrinhoConteudo'><p class='text-center text-muted'>Carrinho vazio</p></div>");
+        out.println("</div>");
 
-        // FOOTER
+        // === FOOTER ===
         out.println("<footer id='about' class='bg-dark text-white py-5 mt-5'>");
-        out.println("<div class='container text-center'>");
-        out.println("<h3>Grupo 4</h3>");
-        out.println("<div class='row row-cols-5 g-3'>");
-        out.println("<div class='col'><img src='" + contextPath + "/imagens/devs/langa.jpg' width='80' class='rounded-circle'><br>Patrick Langa<br>20231003</div>");
-        out.println("<div class='col'><img src='" + contextPath + "/imagens/devs/ryry.jpg' width='80' class='rounded-circle'><br>Ryazy Hassane<br>20230304</div>");
-        out.println("<div class='col'><img src='" + contextPath + "/imagens/devs/tig.jpg' width='80' class='rounded-circle'><br>Tiago Correia<br>20200018</div>");
-        out.println("<div class='col'><img src='" + contextPath + "/imagens/devs/vigi.jpg' width='80' class='rounded-circle'><br>Viginaldo Joaquim<br>20210982</div>");
-        out.println("<div class='col'><img src='" + contextPath + "/imagens/devs/yuyu.jpg' width='80' class='rounded-circle'><br>Yunus Suelmia<br>20210382</div>");
-        out.println("</div></div></footer>");
+        out.println("<div class='container'><h3 class='text-center mb-5'>Grupo 4</h3>");
+        out.println("<div class='row row-cols-1 row-cols-md-5 g-4'>");
+        out.println("<div class='col text-center'><img src='" + contextPath + "/imagens/devs/langa.jpg' class='rounded-circle mb-3' width='120' height='120'><h6 class='fw-bold'>Patrick Langa</h6><p class='small'>20231003<br>Desenvolvedor Mobile</p></div>");
+        out.println("<div class='col text-center'><img src='" + contextPath + "/imagens/devs/ryry.jpg' class='rounded-circle mb-3' width='120' height='120'><h6 class='fw-bold'>Ryazy Hassane</h6><p class='small'>20230304<br>Desenvolvedor Back-end</p></div>");
+        out.println("<div class='col text-center'><img src='" + contextPath + "/imagens/devs/tig.jpg' class='rounded-circle mb-3' width='120' height='120'><h6 class='fw-bold'>Tiago Correia</h6><p class='small'>20200018<br>Designer UI/UX</p></div>");
+        out.println("<div class='col text-center'><img src='" + contextPath + "/imagens/devs/vigi.jpg' class='rounded-circle mb-3' width='120' height='120'><h6 class='fw-bold'>Viginaldo Joaquim</h6><p class='small'>20210982<br>Desenvolvedor Full-Stack</p></div>");
+        out.println("<div class='col text-center'><img src='" + contextPath + "/imagens/devs/yuyu.jpg' class='rounded-circle mb-3' width='120' height='120'><h6 class='fw-bold'>Yunus Suelmia</h6><p class='small'>20210382<br>Tester & QA</p></div>");
+        out.println("</div><hr class='my-4'><p class='text-center small'>© 2025 ITS Shop - Trabalho Prático de SD. Todos os direitos reservados.</p></div></footer>");
 
-        // JS
+        // === BOTÃO VOLTAR AO TOPO ===
+        out.println("<button onclick='scrollToTop()' id='btnTop' class='btn btn-success rounded-circle shadow-lg' style='position:fixed; bottom:30px; right:30px; width:50px; height:50px; display:none; z-index:1000;' title='Voltar ao topo'>");
+        out.println("<i class='fas fa-arrow-up'></i></button>");
+
+        // === JAVASCRIPT DO CARRINHO (sessionStorage) ===
         out.println("<script src='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js'></script>");
         out.println("<script>");
         out.println("let cart = JSON.parse(sessionStorage.getItem('cart')) || {};");
-        out.println("function addToCart(id) {");
+        out.println("let produtoAtual = null; let qtdAtual = 1;");
+        out.println("const contextPath = '" + contextPath + "';");
+
+        // Atualiza contador e ícones
+        out.println("function updateCart() {");
+        out.println("  const count = Object.values(cart).reduce((a,b) => a + b, 0);");
+        out.println("  document.getElementById('cart-count').textContent = count;");
+        out.println("  for (let id in estoque) {");
+        out.println("    const icon = document.getElementById('cart-icon-' + id);");
+        out.println("    if (icon) icon.className = cart[id] ? 'fas fa-cart-check text-primary' : 'fas fa-cart-plus text-success';");
+        out.println("  }");
+        out.println("  renderCarrinho();");
+        out.println("}");
+
+        // Toggle add/remove
+        out.println("function toggleCart(id) {");
         out.println("  cart[id] = (cart[id] || 0) + 1;");
         out.println("  sessionStorage.setItem('cart', JSON.stringify(cart));");
-        out.println("  updateCount();");
-        out.println("  document.getElementById('icon-'+id).className = 'fas fa-check text-primary';");
+        out.println("  updateCart();");
         out.println("}");
-        out.println("function updateCount() {");
-        out.println("  const count = Object.values(cart).reduce((a,b)=>a+b,0);");
-        out.println("  document.getElementById('cart-count').textContent = count;");
+
+        // Abrir carrinho
+        out.println("function abrirCarrinho(id, nome, preco, imagem) {");
+        out.println("  if (id) { produtoAtual = {id, nome, preco: parseFloat(preco), imagem}; qtdAtual = cart[id] || 1; }");
+        out.println("  else if (!produtoAtual) return;");
+        out.println("  const total = (produtoAtual.preco * qtdAtual).toFixed(2);");
+        out.println("  const conteudo = `");
+        out.println("    <div class='text-center p-3'>");
+        out.println("      <img src='${contextPath}/` + produtoAtual.imagem + `' class='img-fluid rounded mb-3' style='max-height:150px;'>");
+        out.println("      <h6 class='fw-bold'>` + produtoAtual.nome + `</h6>");
+        out.println("      <p class='text-success fw-bold'>Preço: <span id='precoUnit'>` + produtoAtual.preco + `</span> MT</p>");
+        out.println("      <div class='d-flex justify-content-center align-items-center mb-3'>");
+        out.println("        <button class='btn btn-outline-secondary btn-sm' onclick='mudarQtd(-1)'>−</button>");
+        out.println("        <span class='mx-3 fw-bold fs-5' id='quantidade'>` + qtdAtual + `</span>");
+        out.println("        <button class='btn btn-outline-secondary btn-sm' onclick='mudarQtd(1)'>+</button>");
+        out.println("      </div>");
+        out.println("      <p class='fs-4 text-primary fw-bold'>Total: <span id='total'>` + total + `</span> MT</p>");
+        out.println("      <button class='btn btn-success w-100' onclick='irParaDadosCliente()'>Continuar</button>");
+        out.println("    </div>`;");
+        out.println("  document.getElementById('carrinhoConteudo').innerHTML = conteudo;");
+        out.println("  new bootstrap.Offcanvas(document.getElementById('carrinho')).show();");
         out.println("}");
-        out.println("window.onload = updateCount;");
+
+        out.println("function mudarQtd(delta) { qtdAtual = Math.max(1, qtdAtual + delta); cart[produtoAtual.id] = qtdAtual; sessionStorage.setItem('cart', JSON.stringify(cart)); abrirCarrinho(); }");
+        out.println("function irParaDadosCliente() {");
+        out.println("  const total = (produtoAtual.preco * qtdAtual).toFixed(2);");
+        out.println("  document.getElementById('carrinhoConteudo').innerHTML = `");
+        out.println("    <div class='p-3'><h6 class='text-center mb-4 fw-bold'>Finalizar Compra</h6>");
+        out.println("    <form action='confirmacao' method='post'>");
+        out.println("      <input type='hidden' name='idItem' value='` + produtoAtual.id + `'>");
+        out.println("      <input type='hidden' name='quantidade' value='` + qtdAtual + `'>");
+        out.println("      <input type='hidden' name='total' value='` + total + `'>");
+        out.println("      <div class='mb-3'><input type='text' name='nomeCliente' class='form-control' placeholder='Nome Completo' required></div>");
+        out.println("      <div class='mb-3'><input type='text' name='endereco' class='form-control' placeholder='Endereço de Entrega' required></div>");
+        out.println("      <div class='mb-3'><input type='text' name='numeroCartao' class='form-control' placeholder='Cartão (16 dígitos)' pattern='[0-9]{16}' maxlength='16' required></div>");
+        out.println("      <button type='submit' class='btn btn-success w-100'>Finalizar Compra</button>");
+        out.println("    </form></div>`;");
+        out.println("}");
+
+        // Inicialização
+        out.println("const estoque = " + estoque.keySet().stream().map(id -> "'" + id + "':true").reduce((a,b)->a+","+b).orElse("") + ";");
+        out.println("window.onload = updateCart;");
+        out.println("window.onscroll = () => document.getElementById('btnTop').style.display = (document.body.scrollTop > 300 || document.documentElement.scrollTop > 300) ? 'block' : 'none';");
+        out.println("function scrollToTop() { window.scrollTo({top: 0, behavior: 'smooth'}); }");
         out.println("</script>");
 
         out.println("</body></html>");
