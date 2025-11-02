@@ -281,7 +281,7 @@ public class ListaITSServlet extends HttpServlet {
         
         // === BOTÃO PARA EXIBIR O CARRINHO (FLUTUANTE) ===
         out.println("<button onclick='scrollToTop()' id='btnTop' class='btn btn-success rounded-circle shadow-lg' ");
-        out.println("style='position:fixed; bottom:60px; right:30px; width:50px; height:50px; z-index:1000;' ");
+        out.println("style='position:fixed; bottom:90px; right:30px; width:50px; height:50px; z-index:1000;' ");
         out.println("title='Carrinho'>");
         out.println("<i class='fas fa-shopping-cart'></i>");
         out.println("</button>");
