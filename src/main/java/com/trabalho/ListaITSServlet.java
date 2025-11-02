@@ -278,6 +278,13 @@ public class ListaITSServlet extends HttpServlet {
         out.println("title='Voltar ao topo'>");
         out.println("<i class='fas fa-arrow-up'></i>");
         out.println("</button>");
+        
+        // === BOTÃO PARA EXIBIR O CARRINHO (FLUTUANTE) ===
+        out.println("<button onclick='scrollToTop()' id='btnTop' class='btn btn-success rounded-circle shadow-lg' ");
+        out.println("style='position:fixed; bottom:60px; right:30px; width:50px; height:50px; z-index:1000;' ");
+        out.println("title='Carrinho'>");
+        out.println("<i class='fas fa-shopping-cart'></i>");
+        out.println("</button>");
 
         // === JavaScript para mostrar/esconder + scroll suave ===
         out.println("<script>");
