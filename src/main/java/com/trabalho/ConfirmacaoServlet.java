@@ -26,13 +26,16 @@ public class ConfirmacaoServlet extends HttpServlet {
                 String id = p.substring(4);
                 String qtd = req.getParameter(p);
                 itens.add(id + " (x" + qtd + ")");
+            } else if (p.equals("idItem")) {
+                String id = req.getParameter(p);
+                String qtd = req.getParameter("quantidade");
+                itens.add(id + " (x" + qtd + ")");
             }
         }
 
         String cartaoMascarado = (numeroCartao != null && numeroCartao.matches("\\d{16}"))
             ? "**** **** **** " + numeroCartao.substring(12)
             : "**** **** **** XXXX";
-
 
         out.println("<!DOCTYPE html><html lang='pt'><head>");
         out.println("<meta charset='UTF-8'><title>Recibo</title>");

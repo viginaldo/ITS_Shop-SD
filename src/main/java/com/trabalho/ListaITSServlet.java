@@ -50,6 +50,8 @@ public class ListaITSServlet extends HttpServlet {
         out.println(".card-img-top{height:180px;object-fit:contain;background:#fff;padding:10px;}");
         out.println(".back-to-top{position:fixed;bottom:20px;right:20px;z-index:1000;display:none;}");
         out.println(".qty-input{width:60px;text-align:center;}");
+        out.println(".form-step { display: none; }");
+        out.println(".form-step.active { display: block; }");
         out.println("</style></head><body>");
 
         // NAVBAR
@@ -126,12 +128,13 @@ public class ListaITSServlet extends HttpServlet {
         out.println("<input type='number' id='off-qty' class='form-control qty-input mx-2' value='1' min='1'>");
         out.println("<button class='btn btn-outline-secondary' onclick='updateQtyOffcanvas(1)'>+</button>");
         out.println("</div>");
-        out.println("<form id='formOffcanvas' method='post' action='confirmacao'>");
+        out.println("<button class='btn btn-primary w-100 mb-3' onclick='mostrarFormOffcanvas()'>Continuar</button>");
+        out.println("<form id='formOffcanvas' class='form-step' method='post' action='confirmacao'>");
         out.println("<input type='hidden' name='idItem' id='hidden-id'>");
         out.println("<input type='hidden' name='quantidade' id='hidden-qty' value='1'>");
         out.println("<div class='mb-3'><label class='form-label'>Nome Completo</label><input type='text' class='form-control' name='nomeCliente' required></div>");
-        out.println("<div class='mb-3'><label class='form-label'>Endereço</label><input type='text' class='form-control' name='endereco' required></div>");
-        out.println("<div class='mb-3'><label class='form-label'>Cartão (16 dígitos)</label><input type='text' class='form-control' name='numeroCartao' pattern='\\d{16}' maxlength='16' required></div>");
+        out.println("<div class='mb-3'><label class='form-label'>Endereço Completo</label><input type='text' class='form-control' name='endereco' required></div>");
+        out.println("<div class='mb-3'><label class='form-label'>Número do Cartão (16 dígitos)</label><input type='text' class='form-control' name='numeroCartao' pattern='\\d{16}' maxlength='16' placeholder='1234 5678 9012 3456' required></div>");
         out.println("<button type='submit' class='btn btn-success w-100'>Confirmar Compra</button>");
         out.println("</form></div></div>");
 
@@ -139,19 +142,32 @@ public class ListaITSServlet extends HttpServlet {
         out.println("<div class='modal fade' id='modalCarrinho' tabindex='-1'>");
         out.println("<div class='modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable'>");
         out.println("<div class='modal-content'>");
-        out.println("<div class='modal-header'>");
+        out.println("<div class='modal-header d-flex justify-content-between align-items-center'>");
         out.println("<h5>Carrinho (<span id='total-itens'>0</span>)</h5>");
-        out.println("<div>");
-        out.println("<div class='form-check'><input class='form-check-input' type='checkbox' id='selecionar-todos' onchange='toggleAll()'> <label class='form-check-label'>Selecionar todos</label></div>");
-        out.println("<button class='btn btn-sm btn-outline-danger' onclick='removerSelecionados()'>Remover selecionados</button>");
+        out.println("<div class='d-flex gap-2'>");
+        out.println("<div class='form-check'><input class='form-check-input' type='checkbox' id='selecionar-todos' onchange='toggleAll()'> <label class='form-check-label'>Todos</label></div>");
+        out.println("<button class='btn btn-sm btn-outline-danger' onclick='removerSelecionados()'>Remover</button>");
         out.println("</div>");
         out.println("<button type='button' class='btn-close' data-bs-dismiss='modal'></button>");
         out.println("</div>");
         out.println("<div class='modal-body' id='carrinho-itens'></div>");
         out.println("<div class='modal-footer justify-content-between'>");
         out.println("<span>Total: <strong id='total-preco'>0.00</strong> MT</span>");
-        out.println("<button class='btn btn-success' onclick='abrirCheckoutMultiplo()'>Continuar</button>");
+        out.println("<button class='btn btn-primary' onclick='mostrarCheckoutMultiplo()'>Continuar</button>");
         out.println("</div></div></div></div>");
+
+        // MODAL CHECKOUT
+        out.println("<div class='modal fade' id='modalCheckout' tabindex='-1'>");
+        out.println("<div class='modal-dialog modal-dialog-centered'>");
+        out.println("<div class='modal-content'>");
+        out.println("<div class='modal-header'><h5>Finalizar Compra</h5><button type='button' class='btn-close' data-bs-dismiss='modal'></button></div>");
+        out.println("<div class='modal-body'>");
+        out.println("<form id='formCheckoutMultiplo' method='post' action='confirmacao'>");
+        out.println("<div class='mb-3'><label class='form-label'>Nome Completo</label><input type='text' class='form-control' name='nomeCliente' required></div>");
+        out.println("<div class='mb-3'><label class='form-label'>Endereço Completo</label><input type='text' class='form-control' name='endereco' required></div>");
+        out.println("<div class='mb-3'><label class='form-label'>Número do Cartão</label><input type='text' class='form-control' name='numeroCartao' pattern='\\d{16}' maxlength='16' placeholder='1234 5678 9012 3456' required></div>");
+        out.println("<button type='submit' class='btn btn-success w-100'>Confirmar</button>");
+        out.println("</form></div></div></div></div>");
 
         // ESTOQUE + JS
         out.println("<script>");
@@ -182,12 +198,17 @@ public class ListaITSServlet extends HttpServlet {
         out.println("  offItemId = id; offQty = cart[id] || 1;");
         out.println("  document.getElementById('off-qty').value = offQty;");
         out.println("  document.getElementById('hidden-qty').value = offQty;");
+        out.println("  document.querySelectorAll('.form-step').forEach(f => f.classList.remove('active'));");
         out.println("}");
 
         out.println("function updateQtyOffcanvas(delta) {");
         out.println("  offQty = Math.max(1, offQty + delta);");
         out.println("  document.getElementById('off-qty').value = offQty;");
         out.println("  document.getElementById('hidden-qty').value = offQty;");
+        out.println("}");
+
+        out.println("function mostrarFormOffcanvas() {");
+        out.println("  document.getElementById('formOffcanvas').classList.add('active');");
         out.println("}");
 
         out.println("document.getElementById('formOffcanvas').onsubmit = function() {");
@@ -244,8 +265,9 @@ public class ListaITSServlet extends HttpServlet {
         out.println("function toggleAll() { const checked = document.getElementById('selecionar-todos').checked; document.querySelectorAll('.item-check').forEach(c => c.checked = checked); }");
         out.println("function removerSelecionados() { document.querySelectorAll('.item-check:checked').forEach(c => { const id = c.dataset.id; delete cart[id]; document.getElementById('icon-'+id).className = 'fas fa-cart-plus text-success'; }); sessionStorage.setItem('cart', JSON.stringify(cart)); updateCart(); }");
 
-        out.println("function abrirCheckoutMultiplo() {");
-        out.println("  const form = document.createElement('form'); form.method = 'POST'; form.action = 'confirmacao';");
+        out.println("function mostrarCheckoutMultiplo() {");
+        out.println("  const form = document.getElementById('formCheckoutMultiplo');");
+        out.println("  form.innerHTML = '';");
         out.println("  let total = 0;");
         out.println("  document.querySelectorAll('.item-check:checked').forEach(cb => {");
         out.println("    const id = cb.dataset.id; const qtd = cart[id]; const item = estoque.find(e => e.id === id);");
@@ -253,7 +275,8 @@ public class ListaITSServlet extends HttpServlet {
         out.println("    const input = document.createElement('input'); input.type = 'hidden'; input.name = 'qtd_' + id; input.value = qtd; form.appendChild(input);");
         out.println("  });");
         out.println("  const totalInput = document.createElement('input'); totalInput.type = 'hidden'; totalInput.name = 'total'; totalInput.value = total.toFixed(2); form.appendChild(totalInput);");
-        out.println("  document.body.appendChild(form); form.submit();");
+        out.println("  const modal = bootstrap.Modal.getInstance(document.getElementById('modalCarrinho')); modal.hide();");
+        out.println("  new bootstrap.Modal(document.getElementById('modalCheckout')).show();");
         out.println("}");
 
         // VOLTAR AO TOPO
