@@ -18,18 +18,21 @@ public class ConfirmacaoServlet extends HttpServlet {
         String endereco = req.getParameter("endereco");
         String numeroCartao = req.getParameter("numeroCartao");
 
-        List<String> ids = new ArrayList<>();
+        List<String> itens = new ArrayList<>();
         Enumeration<String> params = req.getParameterNames();
         while (params.hasMoreElements()) {
             String p = params.nextElement();
-            if (p.startsWith("id_")) {
-                ids.add(p.substring(3));
+            if (p.startsWith("qtd_")) {
+                String id = p.substring(4);
+                String qtd = req.getParameter(p);
+                itens.add(id + " (x" + qtd + ")");
             }
         }
 
         String cartaoMascarado = (numeroCartao != null && numeroCartao.matches("\\d{16}"))
             ? "**** **** **** " + numeroCartao.substring(12)
             : "**** **** **** XXXX";
+
 
         out.println("<!DOCTYPE html><html lang='pt'><head>");
         out.println("<meta charset='UTF-8'><title>Recibo</title>");
@@ -43,7 +46,7 @@ public class ConfirmacaoServlet extends HttpServlet {
         out.println("<h3>Compra Confirmada!</h3></div>");
         out.println("<div class='card-body'>");
 
-        out.println("<p><strong>Itens:</strong> " + String.join(", ", ids) + "</p>");
+        out.println("<p><strong>Itens:</strong> " + (itens.isEmpty() ? "Nenhum" : String.join(", ", itens)) + "</p>");
         out.println("<p class='text-primary fw-bold fs-5'>Total: " + total + " MT</p>");
 
         out.println("<hr>");
