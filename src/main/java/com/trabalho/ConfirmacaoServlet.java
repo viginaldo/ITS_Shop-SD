@@ -1,7 +1,7 @@
 package com.trabalho;
 
 import java.io.*;
-import java.time.LocalDateTime;
+import java.time.*;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import jakarta.servlet.*;
@@ -16,14 +16,14 @@ public class ConfirmacaoServlet extends HttpServlet {
         res.setContentType("text/html;charset=UTF-8");
         PrintWriter out = res.getWriter();
 
-        // === PEGA ESTOQUE COMPARTILHADO ===
+        // === ESTOQUE COMPARTILHADO ===
         @SuppressWarnings("unchecked")
         Map<String, Equipamento> estoque = (Map<String, Equipamento>) 
             req.getServletContext().getAttribute("estoque");
 
-        boolean catalogoCarregado = estoque != null && !estoque.isEmpty();
+        boolean catalogoOk = estoque != null && !estoque.isEmpty();
 
-        // === DADOS DO CLIENTE (sempre capturados) ===
+        // === DADOS DO CLIENTE ===
         String nomeCliente = req.getParameter("nomeCliente");
         String endereco = req.getParameter("endereco");
         String numeroCartao = req.getParameter("numeroCartao");
@@ -33,56 +33,51 @@ public class ConfirmacaoServlet extends HttpServlet {
             ? "**** **** **** " + numeroCartao.substring(12)
             : "**** **** **** XXXX";
 
-        LocalDateTime agora = LocalDateTime.now();
+        // === DATA E HORA EM MAPUTO (UTC+2) ===
+        ZonedDateTime agora = ZonedDateTime.now(ZoneId.of("Africa/Maputo"));
         DateTimeFormatter fmtData = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         DateTimeFormatter fmtHora = DateTimeFormatter.ofPattern("HH:mm");
         String data = fmtData.format(agora);
         String hora = fmtHora.format(agora);
         String docNum = "VD_" + agora.format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"));
 
-        // === INÍCIO DO HTML ===
+        // === HTML ===
         out.println("<!DOCTYPE html><html lang='pt'><head>");
-        out.println("<meta charset='UTF-8'><title>Recibo</title>");
+        out.println("<meta charset='UTF-8'><title>Recibo ITS</title>");
         out.println("<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>");
         out.println("<link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css' rel='stylesheet'>");
+        out.println("<script src='https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js'></script>");
         out.println("<script src='https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js'></script>");
         out.println("<style>");
-        out.println("@media print { .no-print { display: none; } }");
-        out.println(".recibo { max-width: 380px; margin: 20px auto; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.3; }");
-        out.println("th, td { font-size: 12px; padding: 2px 0; }");
+        out.println(".recibo { max-width: 380px; margin: 20px auto; font-family: 'Courier New', monospace; font-size: 13px; line-height: 1.3; padding: 15px; border: 1px solid #000; background: #fff; }");
+        out.println("th, td { font-size: 12px; padding: 1px 0; }");
         out.println(".text-right { text-align: right; }");
-        out.println("hr { border: 0; border-top: 1px dashed #000; margin: 8px 0; }");
+        out.println("hr { border-top: 1px dashed #000; margin: 6px 0; }");
         out.println("</style></head><body>");
 
-        // === BOTÃO DE DOWNLOAD SEMPRE VISÍVEL ===
+        // === BOTÃO DE DOWNLOAD ===
         out.println("<div class='position-fixed' style='bottom:20px; right:20px; z-index:1000;'>");
         out.println("<button onclick='gerarPDF()' class='btn btn-success btn-sm rounded-circle shadow' title='Baixar Recibo'>");
         out.println("<i class='fas fa-download'></i></button>");
         out.println("</div>");
 
-        out.println("<div class='recibo bg-white p-3 border'>");
+        out.println("<div class='recibo'>");
 
         // === CABEÇALHO ===
-        out.println("<div class='text-center'>");
-        out.println("<h6 class='fw-bold mb-0'>ITS SHOP & TECH S.A.</h6>");
-        out.println("<small>Av. 24 de Julho, NAMPULA<br>NAMPULA - CIDADE<br>N.U.I.T. 40190268</small>");
-        out.println("</div><hr>");
+        out.println("<div class='text-center'><h6 class='fw-bold mb-0'>ITS SHOP & TECH S.A.</h6>");
+        out.println("<small>Av. 24 de Julho, NAMPULA<br>NAMPULA - CIDADE<br>N.U.I.T. 40190268</small></div><hr>");
 
-        out.println("<div class='d-flex justify-content-between'>");
-        out.println("<small>Data: " + data + " " + hora + "</small>");
-        out.println("<small>Caixa: 2</small>");
-        out.println("</div>");
-        out.println("<small>Número do documento: " + docNum + "</small>");
+        out.println("<div class='d-flex justify-content-between'><small>Data: " + data + " " + hora + "</small><small>Caixa: 2</small></div>");
+        out.println("<small>Nº doc: " + docNum + "</small><br>");
         out.println("<small>Nome: CLIENTE GERAL</small><hr>");
 
-        // === SE CATÁLOGO NÃO CARREGADO ===
-        if (!catalogoCarregado) {
-            out.println("<div class='text-center text-danger'>");
-            out.println("<p><strong>Erro: Catálogo não carregado.</strong></p>");
-            out.println("<p><a href='" + req.getContextPath() + "/lista'>Tente novamente</a></p>");
+        // === ERRO OU ITENS ===
+        if (!catalogoOk) {
+            out.println("<div class='text-center text-danger fw-bold'>");
+            out.println("ERRO: Catálogo não carregado.<br>");
+            out.println("<a href='" + req.getContextPath() + "/lista'>Tente novamente</a>");
             out.println("</div>");
         } else {
-            // === ITENS COMPRADOS ===
             List<ItemCompra> itens = new ArrayList<>();
             double total = 0.0;
             Enumeration<String> params = req.getParameterNames();
@@ -94,70 +89,55 @@ public class ConfirmacaoServlet extends HttpServlet {
                     int qtd = Integer.parseInt(req.getParameter(p));
                     Equipamento eq = estoque.get(id);
                     if (eq != null) {
-                        double subtotal = eq.getPreco() * qtd;
-                        total += subtotal;
-                        itens.add(new ItemCompra(eq.getNome(), eq.getPreco(), qtd, subtotal));
+                        double sub = eq.getPreco() * qtd;
+                        total += sub;
+                        itens.add(new ItemCompra(eq.getNome(), eq.getPreco(), qtd, sub));
                     }
                 } else if (p.equals("idItem")) {
                     String id = req.getParameter("idItem");
                     int qtd = Integer.parseInt(req.getParameter("quantidade"));
-                    double subt = Double.parseDouble(req.getParameter("total"));
+                    double sub = Double.parseDouble(req.getParameter("total"));
                     Equipamento eq = estoque.get(id);
                     if (eq != null) {
-                        itens.add(new ItemCompra(eq.getNome(), eq.getPreco(), qtd, subt));
-                        total = subt;
+                        itens.add(new ItemCompra(eq.getNome(), eq.getPreco(), qtd, sub));
+                        total = sub;
                     }
                 }
             }
             if (totalStr != null && !totalStr.isEmpty()) total = Double.parseDouble(totalStr);
 
-            // === TABELA DE ITENS ===
-            out.println("<table class='w-100'><thead><tr>");
-            out.println("<th>QTD</th><th>DESCRIÇÃO</th><th class='text-right'>PREÇO</th><th class='text-right'>TOTAL</th>");
-            out.println("</tr></thead><tbody>");
-
-            for (ItemCompra item : itens) {
-                out.println("<tr>");
-                out.println("<td>" + item.qtd + " UNI</td>");
-                out.println("<td>" + truncate(item.nome, 22) + "</td>");
-                out.println("<td class='text-right'>" + String.format("%.2f", item.preco) + "</td>");
-                out.println("<td class='text-right'>" + String.format("%.2f", item.subtotal) + "</td>");
-                out.println("</tr>");
+            out.println("<table class='w-100'><thead><tr><th>QTD</th><th>DESCRIÇÃO</th><th class='text-right'>PREÇO</th><th class='text-right'>TOTAL</th></tr></thead><tbody>");
+            for (ItemCompra i : itens) {
+                out.println("<tr><td>" + i.qtd + " UNI</td><td>" + truncate(i.nome, 22) + "</td><td class='text-right'>" + String.format("%.2f", i.preco) + "</td><td class='text-right'>" + String.format("%.2f", i.subtotal) + "</td></tr>");
             }
             out.println("</tbody></table><hr>");
 
-            // === TOTAIS ===
             out.println("<div class='d-flex justify-content-between'><strong>Total Venda:</strong> <strong>" + String.format("%.2f", total) + " MT</strong></div>");
-            out.println("<div class='d-flex justify-content-between mt-1'><strong>TOTAL OFERTADO</strong> <strong>" + String.format("%.2f", total) + " MT</strong></div>");
-            out.println("<div class='d-flex justify-content-between mt-1'><strong>CARTÃO</strong> <strong>" + String.format("%.2f", total) + " MT</strong></div><hr>");
+            out.println("<div class='d-flex justify-content-between'><strong>TOTAL OFERTADO</strong> <strong>" + String.format("%.2f", total) + " MT</strong></div>");
+            out.println("<div class='d-flex justify-content-between'><strong>CARTÃO</strong> <strong>" + String.format("%.2f", total) + " MT</strong></div><hr>");
         }
 
-        // === DADOS DO CLIENTE ===
+        // === CLIENTE ===
         out.println("<small><strong>Cliente:</strong> " + (nomeCliente != null ? nomeCliente : "Anônimo") + "</small><br>");
         out.println("<small><strong>Entrega:</strong> " + (endereco != null ? endereco : "Não informado") + "</small><br>");
         out.println("<small><strong>Cartão:</strong> " + cartaoMascarado + "</small><hr>");
 
-        // === RODAPÉ ===
-        out.println("<div class='text-center'>");
-        out.println("<small>Obrigado pela preferência!<br>Processado por: ITS Shop System</small>");
+        out.println("<div class='text-center'><small>Obrigado!<br>ITS Shop System</small></div>");
         out.println("</div>");
 
-        out.println("</div>"); // fim recibo
-
-        // === SCRIPT PARA GERAR PDF ===
+        // === SCRIPT PDF ===
         out.println("<script>");
         out.println("function gerarPDF() {");
-        out.println("  const { jsPDF } = window.jspdf;");
-        out.println("  const doc = new jsPDF({ orientation: 'portrait', unit: 'mm', format: [80, 200] });");
-        out.println("  const recibo = document.querySelector('.recibo').innerText;");
-        out.println("  const linhas = recibo.split('\\n');");
-        out.println("  let y = 10;");
-        out.println("  linhas.forEach(linha => {");
-        out.println("    if (y > 190) { doc.addPage(); y = 10; }");
-        out.println("    doc.text(linha.trim(), 5, y);");
-        out.println("    y += 4;");
+        out.println("  const recibo = document.querySelector('.recibo');");
+        out.println("  html2canvas(recibo, {scale: 3}).then(canvas => {");
+        out.println("    const img = canvas.toDataURL('image/png');");
+        out.println("    const { jsPDF } = window.jspdf;");
+        out.println("    const pdf = new jsPDF('p', 'mm', [80, 200]);");
+        out.println("    const width = pdf.internal.pageSize.getWidth();");
+        out.println("    const height = (canvas.height * width) / canvas.width;");
+        out.println("    pdf.addImage(img, 'PNG', 0, 0, width, height);");
+        out.println("    pdf.save('recibo_ITS.pdf');");
         out.println("  });");
-        out.println("  doc.save('recibo_" + docNum + ".pdf');");
         out.println("}");
         out.println("</script>");
 
