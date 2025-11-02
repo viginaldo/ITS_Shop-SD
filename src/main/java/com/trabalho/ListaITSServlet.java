@@ -128,13 +128,15 @@ public class ListaITSServlet extends HttpServlet {
         out.println("<input type='number' id='off-qty' class='form-control qty-input mx-2' value='1' min='1'>");
         out.println("<button class='btn btn-outline-secondary' onclick='updateQtyOffcanvas(1)'>+</button>");
         out.println("</div>");
+        out.println("<p class='text-end fw-bold text-success' id='off-total'>Total: 0.00 MT</p>");
         out.println("<button class='btn btn-primary w-100 mb-3' onclick='mostrarFormOffcanvas()'>Continuar</button>");
         out.println("<form id='formOffcanvas' class='form-step' method='post' action='confirmacao'>");
         out.println("<input type='hidden' name='idItem' id='hidden-id'>");
         out.println("<input type='hidden' name='quantidade' id='hidden-qty' value='1'>");
+        out.println("<input type='hidden' name='total' id='hidden-total' value='0'>");
         out.println("<div class='mb-3'><label class='form-label'>Nome Completo</label><input type='text' class='form-control' name='nomeCliente' required></div>");
         out.println("<div class='mb-3'><label class='form-label'>Endereço Completo</label><input type='text' class='form-control' name='endereco' required></div>");
-        out.println("<div class='mb-3'><label class='form-label'>Número do Cartão (16 dígitos)</label><input type='text' class='form-control' name='numeroCartao' pattern='\\d{16}' maxlength='16' placeholder='1234 5678 9012 3456' required></div>");
+        out.println("<div class='mb-3'><label class='form-label'>Número do Cartão</label><input type='text' class='form-control' name='numeroCartao' pattern='\\d{16}' maxlength='16' placeholder='1234 5678 9012 3456' required></div>");
         out.println("<button type='submit' class='btn btn-success w-100'>Confirmar Compra</button>");
         out.println("</form></div></div>");
 
@@ -181,7 +183,7 @@ public class ListaITSServlet extends HttpServlet {
         out.println("\n];");
 
         out.println("let cart = JSON.parse(sessionStorage.getItem('cart')) || {};");
-        out.println("let offItemId; let offQty = 1;");
+        out.println("let offItemId; let offQty = 1; let offPreco = 0;");
 
         out.println("function toggleCart(id) {");
         out.println("  if (cart[id]) { delete cart[id]; document.getElementById('icon-'+id).className = 'fas fa-cart-plus text-success'; }");
@@ -195,9 +197,10 @@ public class ListaITSServlet extends HttpServlet {
         out.println("  document.getElementById('off-nome').textContent = item.nome;");
         out.println("  document.getElementById('off-preco').textContent = item.preco + ' MT';");
         out.println("  document.getElementById('hidden-id').value = id;");
-        out.println("  offItemId = id; offQty = cart[id] || 1;");
+        out.println("  offItemId = id; offQty = cart[id] || 1; offPreco = item.preco;");
         out.println("  document.getElementById('off-qty').value = offQty;");
         out.println("  document.getElementById('hidden-qty').value = offQty;");
+        out.println("  updateOffcanvasTotal();");
         out.println("  document.querySelectorAll('.form-step').forEach(f => f.classList.remove('active'));");
         out.println("}");
 
@@ -205,6 +208,13 @@ public class ListaITSServlet extends HttpServlet {
         out.println("  offQty = Math.max(1, offQty + delta);");
         out.println("  document.getElementById('off-qty').value = offQty;");
         out.println("  document.getElementById('hidden-qty').value = offQty;");
+        out.println("  updateOffcanvasTotal();");
+        out.println("}");
+
+        out.println("function updateOffcanvasTotal() {");
+        out.println("  const total = offPreco * offQty;");
+        out.println("  document.getElementById('off-total').textContent = 'Total: ' + total.toFixed(2) + ' MT';");
+        out.println("  document.getElementById('hidden-total').value = total.toFixed(2);");
         out.println("}");
 
         out.println("function mostrarFormOffcanvas() {");
