@@ -8,11 +8,6 @@
     <servlet>
         <servlet-name>ListaServlet</servlet-name>
         <servlet-class>com.trabalho.ListaITSServlet</servlet-class>
-        
-        <init-param>
-            <param-name>init</param-name>
-            <param-value>true</param-value>
-        </init-param>
     </servlet>
     <servlet-mapping>
         <servlet-name>ListaServlet</servlet-name>
