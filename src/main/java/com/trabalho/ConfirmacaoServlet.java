@@ -17,14 +17,19 @@ public class ConfirmacaoServlet extends HttpServlet {
         PrintWriter out = res.getWriter();
 
         @SuppressWarnings("unchecked")
-        Map<String, Equipamento> estoque = (Map<String, Equipamento>) 
-            req.getServletContext().getAttribute("estoque");
+        Map<String, Equipamento> estoque = (Map<String, Equipamento>) req.getServletContext().getAttribute("estoque");
 
-        boolean catalogoOk = estoque != null && !estoque.isEmpty();
+        if (estoque == null || estoque.isEmpty()) {
+            out.println("<!DOCTYPE html><html><head><meta charset='UTF-8'><title>Erro</title></head><body>");
+            out.println("<div class='text-center text-danger fw-bold'>ERRO: Catálogo não carregado.<br><a href='" + req.getContextPath() + "/lista'>Tente novamente</a></div>");
+            out.println("</body></html>");
+            return;
+        }
 
         String nomeCliente = req.getParameter("nomeCliente");
         String endereco = req.getParameter("endereco");
         String numeroCartao = req.getParameter("numeroCartao");
+        String totalStr = req.getParameter("total");
 
         String cartaoMascarado = (numeroCartao != null && numeroCartao.matches("\\d{16}"))
             ? "**** **** **** " + numeroCartao.substring(12)
@@ -61,12 +66,25 @@ public class ConfirmacaoServlet extends HttpServlet {
         out.println("<div class='d-flex justify-content-between'><small>Data: " + data + " " + hora + "</small><small>Caixa: 2</small></div>");
         out.println("<small>Nº doc: " + docNum + "</small><br><small>Nome: CLIENTE GERAL</small><hr>");
 
-        if (!catalogoOk) {
-            out.println("<div class='text-center text-danger fw-bold'>ERRO: Catálogo não carregado.<br><a href='" + req.getContextPath() + "/lista'>Tente novamente</a></div>");
-        } else {
-            List<ItemCompra> itens = new ArrayList<>();
-            double total = 0.0;
+        List<ItemCompra> itens = new ArrayList<>();
+        double total = 0.0;
 
+        Enumeration<String> params = req.getParameterNames();
+        while (params.hasMoreElements()) {
+            String p = params.nextElement();
+            if (p.startsWith("qtd_")) {
+                String id = p.substring(4);
+                int qtd = Integer.parseInt(req.getParameter(p));
+                Equipamento eq = estoque.get(id);
+                if (eq != null) {
+                    double sub = eq.getPreco() * qtd;
+                    total += sub;
+                    itens.add(new ItemCompra(eq.getNome(), eq.getPreco(), qtd, sub));
+                }
+            }
+        }
+
+        if (itens.isEmpty() && req.getParameter("idItem") != null) {
             String id = req.getParameter("idItem");
             int qtd = Integer.parseInt(req.getParameter("quantidade"));
             double sub = Double.parseDouble(req.getParameter("total"));
@@ -75,16 +93,18 @@ public class ConfirmacaoServlet extends HttpServlet {
                 itens.add(new ItemCompra(eq.getNome(), eq.getPreco(), qtd, sub));
                 total = sub;
             }
-
-            out.println("<table class='w-100'><thead><tr><th>QTD</th><th>DESCRIÇÃO</th><th class='text-right'>PREÇO</th><th class='text-right'>TOTAL</th></tr></thead><tbody>");
-            for (ItemCompra i : itens) {
-                out.println("<tr><td>" + i.qtd + " UNI</td><td>" + truncate(i.nome, 22) + "</td><td class='text-right'>" + String.format("%.2f", i.preco) + "</td><td class='text-right'>" + String.format("%.2f", i.subtotal) + "</td></tr>");
-            }
-            out.println("</tbody></table><hr>");
-            out.println("<div class='d-flex justify-content-between'><strong>Total Venda:</strong> <strong>" + String.format("%.2f", total) + " MT</strong></div>");
-            out.println("<div class='d-flex justify-content-between'><strong>TOTAL OFERTADO</strong> <strong>" + String.format("%.2f", total) + " MT</strong></div>");
-            out.println("<div class='d-flex justify-content-between'><strong>CARTÃO</strong> <strong>" + String.format("%.2f", total) + " MT</strong></div><hr>");
         }
+
+        if (totalStr != null && !totalStr.isEmpty()) total = Double.parseDouble(totalStr);
+
+        out.println("<table class='w-100'><thead><tr><th>QTD</th><th>DESCRIÇÃO</th><th class='text-right'>PREÇO</th><th class='text-right'>TOTAL</th></tr></thead><tbody>");
+        for (ItemCompra i : itens) {
+            out.println("<tr><td>" + i.qtd + " UNI</td><td>" + truncate(i.nome, 22) + "</td><td class='text-right'>" + String.format("%.2f", i.preco) + "</td><td class='text-right'>" + String.format("%.2f", i.subtotal) + "</td></tr>");
+        }
+        out.println("</tbody></table><hr>");
+        out.println("<div class='d-flex justify-content-between'><strong>Total Venda:</strong> <strong>" + String.format("%.2f", total) + " MT</strong></div>");
+        out.println("<div class='d-flex justify-content-between'><strong>TOTAL OFERTADO</strong> <strong>" + String.format("%.2f", total) + " MT</strong></div>");
+        out.println("<div class='d-flex justify-content-between'><strong>CARTÃO</strong> <strong>" + String.format("%.2f", total) + " MT</strong></div><hr>");
 
         out.println("<small><strong>Cliente:</strong> " + (nomeCliente != null ? nomeCliente : "Anônimo") + "</small><br>");
         out.println("<small><strong>Entrega:</strong> " + (endereco != null ? endereco : "Não informado") + "</small><br>");

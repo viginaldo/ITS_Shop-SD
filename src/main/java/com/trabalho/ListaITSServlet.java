@@ -6,10 +6,11 @@ import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 
 public class ListaITSServlet extends HttpServlet {
-    private Map<String, Equipamento> estoque = new HashMap<>();
 
     @Override
     public void init() throws ServletException {
+        Map<String, Equipamento> estoque = new HashMap<>();
+
         estoque.put("1", new Equipamento("1", "PC Gamer i7 (Intel Core i7, 16GB RAM, RTX 3060)", 45000.00));
         estoque.put("2", new Equipamento("2", "Monitor 27\" 144Hz IPS (LG ou Samsung)", 8500.00));
         estoque.put("3", new Equipamento("3", "Teclado Mecânico RGB (Logitech ou Redragon)", 1800.00));
@@ -30,16 +31,24 @@ public class ListaITSServlet extends HttpServlet {
         estoque.put("18", new Equipamento("18", "Pen Drive 128GB USB 3.0 (SanDisk)", 800.00));
         estoque.put("19", new Equipamento("19", "Power Bank 10000mAh (Anker ou Xiaomi)", 1200.00));
         estoque.put("20", new Equipamento("20", "Hub USB 3.0 4 Portas (Anker)", 900.00));
+
+        getServletContext().setAttribute("estoque", estoque);
     }
 
     @Override
     protected void doGet(HttpServletRequest req, HttpServletResponse res)
             throws ServletException, IOException {
+
+        if (getServletContext().getAttribute("estoque") == null) {
+            init();
+        }
+
         res.setContentType("text/html;charset=UTF-8");
         PrintWriter out = res.getWriter();
         String cp = req.getContextPath();
 
-        if (estoque.isEmpty()) init();
+        @SuppressWarnings("unchecked")
+        Map<String, Equipamento> estoque = (Map<String, Equipamento>) getServletContext().getAttribute("estoque");
 
         out.println("<!DOCTYPE html><html lang='pt'><head>");
         out.println("<meta charset='UTF-8'><title>ITS Shop | Catálogo</title>");
@@ -54,7 +63,6 @@ public class ListaITSServlet extends HttpServlet {
         out.println(".form-step.active { display: block; }");
         out.println("</style></head><body>");
 
-        // NAVBAR
         out.println("<nav class='navbar navbar-expand-lg navbar-dark bg-dark fixed-top'>");
         out.println("<div class='container-fluid'>");
         out.println("<a class='navbar-brand' href='#'>ITS Shop</a>");
@@ -67,7 +75,6 @@ public class ListaITSServlet extends HttpServlet {
         out.println("</ul></div></div></nav>");
         out.println("<div style='height:70px;'></div>");
 
-        // CATÁLOGO — 4 COLUNAS
         out.println("<div class='container py-4'>");
         out.println("<h2 class='text-center mb-4'>Catálogo de Equipamentos</h2>");
         out.println("<div class='row row-cols-1 row-cols-md-2 row-cols-lg-4 g-4'>");
@@ -89,7 +96,6 @@ public class ListaITSServlet extends HttpServlet {
 
         out.println("</div></div>");
 
-        // FOOTER
         out.println("<footer id='about' class='bg-dark text-white py-5 mt-5'>");
         out.println("<div class='container text-center'>");
         out.println("<h3>Grupo 4</h3>");
@@ -101,17 +107,14 @@ public class ListaITSServlet extends HttpServlet {
         out.println("<div class='col text-center'><img src='" + cp + "/imagens/devs/yuyu.jpg' width='70' class='rounded-circle'><br>Yunus Suelmia<br>20210382</div>");
         out.println("</div></div></footer>");
 
-        // BOTÃO CARRINHO
         out.println("<button class='btn btn-primary rounded-circle position-fixed' style='bottom:90px;right:20px;width:60px;height:60px;z-index:1000;' data-bs-toggle='modal' data-bs-target='#modalCarrinho'>");
         out.println("<i class='fas fa-shopping-cart fs-4'></i>");
         out.println("<span class='badge bg-danger position-absolute top-0 start-100 translate-middle' id='cart-count'>0</span>");
         out.println("</button>");
 
-        // VOLTAR AO TOPO
         out.println("<button onclick='topFunction()' id='backToTop' class='btn btn-dark rounded-circle back-to-top'>");
         out.println("<i class='fas fa-arrow-up'></i></button>");
 
-        // OFFCANVAS COMPRA (LATERAL)
         out.println("<div class='offcanvas offcanvas-end' tabindex='-1' id='offcanvasCompra'>");
         out.println("<div class='offcanvas-header'>");
         out.println("<h5>Finalizar Compra</h5>");
@@ -124,7 +127,7 @@ public class ListaITSServlet extends HttpServlet {
         out.println("<p class='text-success fw-bold' id='off-preco'></p>");
         out.println("</div>");
         out.println("<div class='d-flex align-items-center justify-content-center mb-3'>");
-        out.println("<button class='btn btn-outline-secondary' onclick='updateQtyOffcanvas(-1)'>−</button>");
+        out.println("<button class='btn btn-outline-secondary' onclick='updateQtyOffcanvas(-1'>−</button>");
         out.println("<input type='number' id='off-qty' class='form-control qty-input mx-2' value='1' min='1'>");
         out.println("<button class='btn btn-outline-secondary' onclick='updateQtyOffcanvas(1)'>+</button>");
         out.println("</div>");
@@ -140,7 +143,6 @@ public class ListaITSServlet extends HttpServlet {
         out.println("<button type='submit' class='btn btn-success w-100'>Confirmar Compra</button>");
         out.println("</form></div></div>");
 
-        // MODAL CARRINHO
         out.println("<div class='modal fade' id='modalCarrinho' tabindex='-1'>");
         out.println("<div class='modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable'>");
         out.println("<div class='modal-content'>");
@@ -158,7 +160,6 @@ public class ListaITSServlet extends HttpServlet {
         out.println("<button class='btn btn-primary' onclick='mostrarCheckoutMultiplo()'>Continuar</button>");
         out.println("</div></div></div></div>");
 
-        // MODAL CHECKOUT
         out.println("<div class='modal fade' id='modalCheckout' tabindex='-1'>");
         out.println("<div class='modal-dialog modal-dialog-centered'>");
         out.println("<div class='modal-content'>");
@@ -167,7 +168,6 @@ public class ListaITSServlet extends HttpServlet {
         out.println("<form id='formCheckoutMultiplo' method='post' action='confirmacao'></form>");
         out.println("</div></div></div></div>");
 
-        // ESTOQUE + JS
         out.println("<script>");
         out.println("const estoque = [");
         boolean first = true;
