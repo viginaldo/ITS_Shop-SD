@@ -56,23 +56,22 @@ public class ListaITSServlet extends HttpServlet {
         out.println("<link rel='apple-touch-icon' href='" + contextPath + "/imagens/favicons/favicon.png'>");
 
         // META TAGS PARA SEO E PARTILHA
-        out.println("<meta name='description' content='ITS Shop - Loja de Tecnologia em Nampula. Compre laptops, smartphones, periféricos e mais com entrega rápida!'>");
-        out.println("<meta name='author' content='Equipe ITS 2025'>");
-        out.println("<meta name='viewport' content='width=device-width, initial-scale=1'>");
-
-        // OPEN GRAPH (FACEBOOK, WHATSAPP, etc.)
+     // === OPEN GRAPH CORRIGIDO PARA WHATSAPP (URL ABSOLUTA + PNG OTIMIZADO) ===
         out.println("<meta property='og:title' content='ITS Shop - Tecnologia em Nampula'>");
-        out.println("<meta property='og:description' content='Loja oficial de equipamentos de TI: laptops, smartphones, impressoras e acessórios. Entrega em todo Moçambique!'>");
-        out.println("<meta property='og:image' content='" + contextPath + "/imagens/preview.png'>");
-        out.println("<meta property='og:url' content='http://localhost:8080" + contextPath + "/lista'>");
+        out.println("<meta property='og:description' content='Loja de TI com 20 produtos, entrega rápida em Moçambique!'>");
+        out.println("<meta property='og:image' content='https://itsshop-sd-production.up.railway.app/imagens/preview.png'>");
+        out.println("<meta property='og:image:type' content='image/png'>");
+        out.println("<meta property='og:image:width' content='1200'>");
+        out.println("<meta property='og:image:height' content='630'>");
+        out.println("<meta property='og:url' content='https://itsshop-sd-production.up.railway.app'>");
         out.println("<meta property='og:type' content='website'>");
         out.println("<meta property='og:locale' content='pt_MZ'>");
 
-        // TWITTER CARD (X)
+        // === TWITTER CARD (AJUDA WHATSAPP) ===
         out.println("<meta name='twitter:card' content='summary_large_image'>");
         out.println("<meta name='twitter:title' content='ITS Shop - Tecnologia em Nampula'>");
         out.println("<meta name='twitter:description' content='Compre laptops, smartphones e acessórios com entrega rápida!'>");
-        out.println("<meta name='twitter:image' content='" + contextPath + "/imagens/preview.png'>");
+        out.println("<meta name='twitter:image' content='https://itsshop-sd-production.up.railway.app/imagens/preview.png'>");
         
         out.println("<link href='https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css' rel='stylesheet'>");
         out.println("<link href='https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css' rel='stylesheet'>");
