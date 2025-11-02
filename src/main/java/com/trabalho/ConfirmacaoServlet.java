@@ -30,6 +30,7 @@ public class ConfirmacaoServlet extends HttpServlet {
                 String id = req.getParameter(p);
                 String qtd = req.getParameter("quantidade");
                 itens.add(id + " (x" + qtd + ")");
+                total = req.getParameter("total");
             }
         }
 

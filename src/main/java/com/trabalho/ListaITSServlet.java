@@ -164,12 +164,8 @@ public class ListaITSServlet extends HttpServlet {
         out.println("<div class='modal-content'>");
         out.println("<div class='modal-header'><h5>Finalizar Compra</h5><button type='button' class='btn-close' data-bs-dismiss='modal'></button></div>");
         out.println("<div class='modal-body'>");
-        out.println("<form id='formCheckoutMultiplo' method='post' action='confirmacao'>");
-        out.println("<div class='mb-3'><label class='form-label'>Nome Completo</label><input type='text' class='form-control' name='nomeCliente' required></div>");
-        out.println("<div class='mb-3'><label class='form-label'>Endereço Completo</label><input type='text' class='form-control' name='endereco' required></div>");
-        out.println("<div class='mb-3'><label class='form-label'>Número do Cartão</label><input type='text' class='form-control' name='numeroCartao' pattern='\\d{16}' maxlength='16' placeholder='1234 5678 9012 3456' required></div>");
-        out.println("<button type='submit' class='btn btn-success w-100'>Confirmar</button>");
-        out.println("</form></div></div></div></div>");
+        out.println("<form id='formCheckoutMultiplo' method='post' action='confirmacao'></form>");
+        out.println("</div></div></div></div>");
 
         // ESTOQUE + JS
         out.println("<script>");
@@ -277,7 +273,12 @@ public class ListaITSServlet extends HttpServlet {
 
         out.println("function mostrarCheckoutMultiplo() {");
         out.println("  const form = document.getElementById('formCheckoutMultiplo');");
-        out.println("  form.innerHTML = '';");
+        out.println("  form.innerHTML = `");
+        out.println("    <div class='mb-3'><label class='form-label'>Nome Completo</label><input type='text' class='form-control' name='nomeCliente' required></div>");
+        out.println("    <div class='mb-3'><label class='form-label'>Endereço Completo</label><input type='text' class='form-control' name='endereco' required></div>");
+        out.println("    <div class='mb-3'><label class='form-label'>Número do Cartão</label><input type='text' class='form-control' name='numeroCartao' pattern='\\\\d{16}' maxlength='16' placeholder='1234 5678 9012 3456' required></div>");
+        out.println("    <button type='submit' class='btn btn-success w-100'>Confirmar</button>");
+        out.println("  `;");
         out.println("  let total = 0;");
         out.println("  document.querySelectorAll('.item-check:checked').forEach(cb => {");
         out.println("    const id = cb.dataset.id; const qtd = cart[id]; const item = estoque.find(e => e.id === id);");
@@ -289,7 +290,6 @@ public class ListaITSServlet extends HttpServlet {
         out.println("  new bootstrap.Modal(document.getElementById('modalCheckout')).show();");
         out.println("}");
 
-        // VOLTAR AO TOPO
         out.println("window.onscroll = function() { document.getElementById('backToTop').style.display = (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) ? 'block' : 'none'; };");
         out.println("function topFunction() { document.body.scrollTop = 0; document.documentElement.scrollTop = 0; }");
 
