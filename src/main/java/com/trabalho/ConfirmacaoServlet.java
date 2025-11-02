@@ -14,15 +14,15 @@ public class ConfirmacaoServlet extends HttpServlet {
         PrintWriter out = res.getWriter();
 
         String idItem = req.getParameter("idItem");
-        String quantidade = req.getParameter("quantidade");
+        String quantidade = req.getParameter("qtd_" + idItem); // Primeiro item
         String total = req.getParameter("total");
         String nomeCliente = req.getParameter("nomeCliente");
         String endereco = req.getParameter("endereco");
         String numeroCartao = req.getParameter("numeroCartao");
 
         String cartaoMascarado = (numeroCartao != null && numeroCartao.matches("\\d{16}"))
-            ? "*************" + numeroCartao.substring(13)
-            : "*************XXX";
+            ? "**** **** **** " + numeroCartao.substring(12)
+            : "**** **** **** XXXX";
 
         out.println("<!DOCTYPE html><html lang='pt'><head>");
         out.println("<meta charset='UTF-8'><title>Recibo</title>");
@@ -34,12 +34,12 @@ public class ConfirmacaoServlet extends HttpServlet {
         out.println("<div class='container'>");
         out.println("<div class='card shadow-lg mx-auto' style='max-width:600px;'>");
         out.println("<div class='card-header bg-success text-white text-center'>");
-        out.println("<h3><i class='fas fa-check-circle'></i> Compra Confirmada!</h3></div>");
+        out.println("<h3>Compra Confirmada!</h3></div>");
         out.println("<div class='card-body'>");
 
-        out.println("<p><strong>Produto ID:</strong> " + idItem + "</p>");
-        out.println("<p><strong>Quantidade:</strong> " + quantidade + "</p>");
-        out.println("<p class='text-primary fw-bold fs-5'>Total: " + total + " MT</p>");
+        out.println("<p><strong>Produto ID:</strong> " + (idItem != null ? idItem : "N/A") + "</p>");
+        out.println("<p><strong>Quantidade:</strong> " + (quantidade != null ? quantidade : "0") + "</p>");
+        out.println("<p class='text-primary fw-bold fs-5'>Total: " + (total != null ? total : "0.00") + " MT</p>");
 
         out.println("<hr>");
         out.println("<p><strong>Cliente:</strong> " + (nomeCliente != null ? nomeCliente : "Anônimo") + "</p>");
@@ -49,8 +49,8 @@ public class ConfirmacaoServlet extends HttpServlet {
         out.println("<p><strong>Cartão:</strong> " + cartaoMascarado + "</p>");
 
         out.println("<div class='text-center mt-4'>");
-        out.println("<a href='" + req.getContextPath() + "/index.html' class='btn btn-outline-primary btn-lg px-5'>");
-        out.println("<i class='fas fa-home'></i> Voltar à Loja</a>");
+        out.println("<a href='" + req.getContextPath() + "/lista' class='btn btn-outline-primary btn-lg px-5'>");
+        out.println("Voltar ao Catálogo</a>");
         out.println("</div></div></div></div>");
 
         out.println("</body></html>");
