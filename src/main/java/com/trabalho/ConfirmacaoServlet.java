@@ -1,6 +1,7 @@
 package com.trabalho;
 
 import java.io.*;
+import java.util.*;
 import jakarta.servlet.*;
 import jakarta.servlet.http.*;
 
@@ -16,6 +17,15 @@ public class ConfirmacaoServlet extends HttpServlet {
         String nomeCliente = req.getParameter("nomeCliente");
         String endereco = req.getParameter("endereco");
         String numeroCartao = req.getParameter("numeroCartao");
+
+        List<String> ids = new ArrayList<>();
+        Enumeration<String> params = req.getParameterNames();
+        while (params.hasMoreElements()) {
+            String p = params.nextElement();
+            if (p.startsWith("id_")) {
+                ids.add(p.substring(3));
+            }
+        }
 
         String cartaoMascarado = (numeroCartao != null && numeroCartao.matches("\\d{16}"))
             ? "**** **** **** " + numeroCartao.substring(12)
@@ -33,6 +43,7 @@ public class ConfirmacaoServlet extends HttpServlet {
         out.println("<h3>Compra Confirmada!</h3></div>");
         out.println("<div class='card-body'>");
 
+        out.println("<p><strong>Itens:</strong> " + String.join(", ", ids) + "</p>");
         out.println("<p class='text-primary fw-bold fs-5'>Total: " + total + " MT</p>");
 
         out.println("<hr>");

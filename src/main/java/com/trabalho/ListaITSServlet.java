@@ -48,7 +48,6 @@ public class ListaITSServlet extends HttpServlet {
         out.println("<style>");
         out.println("body{background:#f8f9fa;font-family:Arial,sans-serif;}");
         out.println(".card-img-top{height:180px;object-fit:contain;background:#fff;padding:10px;}");
-        out.println(".offcanvas-body img{max-height:80px;object-fit:contain;}");
         out.println(".back-to-top{position:fixed;bottom:20px;right:20px;z-index:1000;display:none;}");
         out.println("</style></head><body>");
 
@@ -74,7 +73,7 @@ public class ListaITSServlet extends HttpServlet {
             out.println("<div class='col'>");
             out.println("<div class='card h-100 shadow-sm'>");
             out.println("<div class='position-relative'>");
-            out.println("<button class='btn btn-sm position-absolute top-0 end-0 m-2 bg-white rounded-circle' onclick=\"addToCart('" + e.getId() + "')\">");
+            out.println("<button class='btn btn-sm position-absolute top-0 end-0 m-2 bg-white rounded-circle' onclick=\"toggleCart('" + e.getId() + "')\">");
             out.println("<i class='fas fa-cart-plus text-success' id='icon-" + e.getId() + "'></i></button>");
             out.println("<img src='" + cp + "/imagens/" + e.getId() + ".jpg' class='card-img-top' alt='" + e.getNome() + "'>");
             out.println("</div>");
@@ -92,21 +91,11 @@ public class ListaITSServlet extends HttpServlet {
         out.println("<div class='container text-center'>");
         out.println("<h3>Grupo 4</h3>");
         out.println("<div class='row row-cols-5 g-3 justify-content-center'>");
-        out.println("<div class='col text-center'>");
-        out.println("<img src='" + cp + "/imagens/devs/langa.jpg' width='70' class='rounded-circle'><br>Patrick Langa<br>20231003");
-        out.println("</div>");
-        out.println("<div class='col text-center'>");
-        out.println("<img src='" + cp + "/imagens/devs/ryry.jpg' width='70' class='rounded-circle'><br>Ryazy Hassane<br>20230304");
-        out.println("</div>");
-        out.println("<div class='col text-center'>");
-        out.println("<img src='" + cp + "/imagens/devs/tig.jpg' width='70' class='rounded-circle'><br>Tiago Correia<br>20200018");
-        out.println("</div>");
-        out.println("<div class='col text-center'>");
-        out.println("<img src='" + cp + "/imagens/devs/vigi.jpg' width='70' class='rounded-circle'><br>Viginaldo Joaquim<br>20210982");
-        out.println("</div>");
-        out.println("<div class='col text-center'>");
-        out.println("<img src='" + cp + "/imagens/devs/yuyu.jpg' width='70' class='rounded-circle'><br>Yunus Suelmia<br>20210382");
-        out.println("</div>");
+        out.println("<div class='col text-center'><img src='" + cp + "/imagens/devs/langa.jpg' width='70' class='rounded-circle'><br>Patrick Langa<br>20231003</div>");
+        out.println("<div class='col text-center'><img src='" + cp + "/imagens/devs/ryry.jpg' width='70' class='rounded-circle'><br>Ryazy Hassane<br>20230304</div>");
+        out.println("<div class='col text-center'><img src='" + cp + "/imagens/devs/tig.jpg' width='70' class='rounded-circle'><br>Tiago Correia<br>20200018</div>");
+        out.println("<div class='col text-center'><img src='" + cp + "/imagens/devs/vigi.jpg' width='70' class='rounded-circle'><br>Viginaldo Joaquim<br>20210982</div>");
+        out.println("<div class='col text-center'><img src='" + cp + "/imagens/devs/yuyu.jpg' width='70' class='rounded-circle'><br>Yunus Suelmia<br>20210382</div>");
         out.println("</div></div></footer>");
 
         // BOTÃO CARRINHO
@@ -115,38 +104,45 @@ public class ListaITSServlet extends HttpServlet {
         out.println("<span class='badge bg-danger position-absolute top-0 start-100 translate-middle' id='cart-count'>0</span>");
         out.println("</button>");
 
-        // BOTÃO VOLTAR AO TOPO
+        // VOLTAR AO TOPO
         out.println("<button onclick='topFunction()' id='backToTop' class='btn btn-dark rounded-circle back-to-top'>");
         out.println("<i class='fas fa-arrow-up'></i></button>");
 
         // OFFCANVAS COMPRA (LATERAL)
         out.println("<div class='offcanvas offcanvas-end' tabindex='-1' id='offcanvasCompra'>");
         out.println("<div class='offcanvas-header'>");
-        out.println("<h5>Adicionar ao Carrinho</h5>");
+        out.println("<h5>Finalizar Compra</h5>");
         out.println("<button type='button' class='btn-close' data-bs-dismiss='offcanvas'></button>");
         out.println("</div>");
-        out.println("<div class='offcanvas-body text-center'>");
-        out.println("<img id='off-img' class='img-fluid mb-3' style='max-height:150px;'>");
-        out.println("<h6 id='off-nome'></h6>");
+        out.println("<div class='offcanvas-body'>");
+        out.println("<div class='text-center mb-3'>");
+        out.println("<img id='off-img' class='img-fluid' style='max-height:120px;'>");
+        out.println("<h6 id='off-nome' class='mt-2'></h6>");
         out.println("<p class='text-success fw-bold' id='off-preco'></p>");
-        out.println("<button class='btn btn-success w-100' onclick='addToCartFromOffcanvas()'>Adicionar</button>");
-        out.println("</div></div>");
+        out.println("</div>");
+        out.println("<form id='formOffcanvas' method='post' action='confirmacao'>");
+        out.println("<input type='hidden' name='idItem' id='hidden-id'>");
+        out.println("<div class='mb-3'><label class='form-label'>Nome Completo</label><input type='text' class='form-control' name='nomeCliente' required></div>");
+        out.println("<div class='mb-3'><label class='form-label'>Endereço</label><input type='text' class='form-control' name='endereco' required></div>");
+        out.println("<div class='mb-3'><label class='form-label'>Cartão (16 dígitos)</label><input type='text' class='form-control' name='numeroCartao' pattern='\\d{16}' maxlength='16' required></div>");
+        out.println("<button type='submit' class='btn btn-success w-100'>Confirmar Compra</button>");
+        out.println("</form></div></div>");
 
         // MODAL CARRINHO
         out.println("<div class='modal fade' id='modalCarrinho' tabindex='-1'>");
         out.println("<div class='modal-dialog modal-lg modal-dialog-centered modal-dialog-scrollable'>");
         out.println("<div class='modal-content'>");
         out.println("<div class='modal-header'>");
-        out.println("<h5>Carrinho (<span id='total-itens'>0</span> itens)</h5>");
+        out.println("<h5>Carrinho (<span id='total-itens'>0</span>)</h5>");
         out.println("<button type='button' class='btn-close' data-bs-dismiss='modal'></button>");
         out.println("</div>");
         out.println("<div class='modal-body' id='carrinho-itens'></div>");
         out.println("<div class='modal-footer justify-content-between'>");
         out.println("<span>Total: <strong id='total-preco'>0.00</strong> MT</span>");
-        out.println("<button class='btn btn-success' onclick='abrirCheckout()'>Finalizar Compra</button>");
+        out.println("<button class='btn btn-success' onclick='abrirCheckoutMultiplo()'>Continuar</button>");
         out.println("</div></div></div></div>");
 
-        // ESTOQUE EM JS
+        // ESTOQUE + JS
         out.println("<script>");
         out.println("const estoque = [");
         boolean first = true;
@@ -160,28 +156,23 @@ public class ListaITSServlet extends HttpServlet {
         out.println("let cart = JSON.parse(sessionStorage.getItem('cart')) || {};");
         out.println("let offItemId;");
 
+        out.println("function toggleCart(id) {");
+        out.println("  if (cart[id]) { delete cart[id]; document.getElementById('icon-'+id).className = 'fas fa-cart-plus text-success'; }");
+        out.println("  else { cart[id] = 1; document.getElementById('icon-'+id).className = 'fas fa-check text-primary'; }");
+        out.println("  sessionStorage.setItem('cart', JSON.stringify(cart)); updateCart();");
+        out.println("}");
+
         out.println("function abrirOffcanvas(id) {");
         out.println("  const item = estoque.find(e => e.id === id);");
         out.println("  document.getElementById('off-img').src = '" + cp + "/imagens/' + id + '.jpg';");
         out.println("  document.getElementById('off-nome').textContent = item.nome;");
         out.println("  document.getElementById('off-preco').textContent = item.preco + ' MT';");
+        out.println("  document.getElementById('hidden-id').value = id;");
         out.println("  offItemId = id;");
         out.println("}");
 
-        out.println("function addToCartFromOffcanvas() {");
-        out.println("  addToCart(offItemId);");
-        out.println("  bootstrap.Offcanvas.getInstance(document.getElementById('offcanvasCompra')).hide();");
-        out.println("}");
-
-        out.println("function addToCart(id) {");
-        out.println("  cart[id] = (cart[id] || 0) + 1;");
-        out.println("  sessionStorage.setItem('cart', JSON.stringify(cart));");
-        out.println("  updateCart();");
-        out.println("  document.getElementById('icon-'+id).className = 'fas fa-check text-primary';");
-        out.println("}");
-
         out.println("function updateCart() {");
-        out.println("  const count = Object.values(cart).reduce((a,b)=>a+b,0);");
+        out.println("  const count = Object.keys(cart).length;");
         out.println("  document.getElementById('cart-count').textContent = count;");
         out.println("  document.getElementById('total-itens').textContent = count;");
         out.println("  renderCarrinho();");
@@ -193,51 +184,40 @@ public class ListaITSServlet extends HttpServlet {
         out.println("  let total = 0;");
         out.println("  Object.keys(cart).forEach(id => {");
         out.println("    const item = estoque.find(e => e.id === id);");
-        out.println("    const qtd = cart[id];");
-        out.println("    const subtotal = item.preco * qtd;");
+        out.println("    const subtotal = item.preco;");
         out.println("    total += subtotal;");
         out.println("    container.innerHTML += `");
-        out.println("      <div class='d-flex align-items-center border-bottom py-2'>");
-        out.println("        <img src='" + cp + "/imagens/${id}.jpg' class='me-3' style='width:50px;'>");
-        out.println("        <div class='flex-grow-1'>");
-        out.println("          <strong>${item.nome}</strong><br>");
-        out.println("          <small>${item.preco} MT × ${qtd}</small>");
-        out.println("        </div>");
-        out.println("        <strong>${subtotal.toFixed(2)} MT</strong>");
-        out.println("        <button class='btn btn-sm btn-danger ms-2' onclick='removerDoCarrinho(\"${id}\")'>×</button>");
+        out.println("      <div class='form-check'>");
+        out.println("        <input class='form-check-input item-check' type='checkbox' value='${id}' checked>");
+        out.println("        <label class='form-check-label d-flex align-items-center'>");
+        out.println("          <img src='" + cp + "/imagens/${id}.jpg' class='me-2' style='width:40px;'>");
+        out.println("          <div><strong>${item.nome}</strong><br><small>${item.preco} MT</small></div>");
+        out.println("        </label>");
         out.println("      </div>`;");
         out.println("  });");
         out.println("  document.getElementById('total-preco').textContent = total.toFixed(2);");
         out.println("}");
 
-        out.println("function removerDoCarrinho(id) {");
-        out.println("  delete cart[id];");
-        out.println("  sessionStorage.setItem('cart', JSON.stringify(cart));");
-        out.println("  updateCart();");
-        out.println("  document.getElementById('icon-'+id).className = 'fas fa-cart-plus text-success';");
-        out.println("}");
-
-        out.println("function abrirCheckout() {");
-        out.println("  const form = document.createElement('form');");
-        out.println("  form.method = 'POST'; form.action = 'confirmacao';");
+        out.println("function abrirCheckoutMultiplo() {");
+        out.println("  const form = document.createElement('form'); form.method = 'POST'; form.action = 'confirmacao';");
         out.println("  let total = 0;");
-        out.println("  Object.keys(cart).forEach(id => {");
-        out.println("    const qtd = cart[id];");
+        out.println("  document.querySelectorAll('.item-check:checked').forEach(cb => {");
+        out.println("    const id = cb.value;");
+        out.println("    const item = estoque.find(e => e.id === id);");
+        out.println("    total += item.preco;");
         out.println("    const input = document.createElement('input');");
-        out.println("    input.type = 'hidden'; input.name = 'qtd_' + id; input.value = qtd;");
+        out.println("    input.type = 'hidden'; input.name = 'id_' + id; input.value = id;");
         out.println("    form.appendChild(input);");
-        out.println("    total += estoque.find(e => e.id === id).preco * qtd;");
         out.println("  });");
-        out.println("  const inputTotal = document.createElement('input');");
-        out.println("  inputTotal.type = 'hidden'; inputTotal.name = 'total'; inputTotal.value = total.toFixed(2);");
-        out.println("  form.appendChild(inputTotal);");
+        out.println("  const totalInput = document.createElement('input');");
+        out.println("  totalInput.type = 'hidden'; totalInput.name = 'total'; totalInput.value = total.toFixed(2);");
+        out.println("  form.appendChild(totalInput);");
         out.println("  document.body.appendChild(form); form.submit();");
         out.println("}");
 
         // VOLTAR AO TOPO
         out.println("window.onscroll = function() {");
-        out.println("  const btn = document.getElementById('backToTop');");
-        out.println("  btn.style.display = (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) ? 'block' : 'none';");
+        out.println("  document.getElementById('backToTop').style.display = (document.body.scrollTop > 100 || document.documentElement.scrollTop > 100) ? 'block' : 'none';");
         out.println("};");
         out.println("function topFunction() { document.body.scrollTop = 0; document.documentElement.scrollTop = 0; }");
 
