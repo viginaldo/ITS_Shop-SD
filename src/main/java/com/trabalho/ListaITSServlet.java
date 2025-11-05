@@ -139,7 +139,16 @@ public class ListaITSServlet extends HttpServlet {
         out.println("<input type='hidden' name='total' id='hidden-total' value='0'>");
         out.println("<div class='mb-3'><label class='form-label'>Nome Completo</label><input type='text' class='form-control' name='nomeCliente' required></div>");
         out.println("<div class='mb-3'><label class='form-label'>Endereço Completo</label><input type='text' class='form-control' name='endereco' required></div>");
-        out.println("<div class='mb-3'><label class='form-label'>Número do Cartão</label><input type='text' class='form-control' name='numeroCartao' pattern='\\d{16}' maxlength='16' placeholder='1234 5678 9012 3456' required></div>");
+        out.println("<div class='row mb-3'>");
+        out.println("  <div class='col-md-8'>");
+        out.println("    <label class='form-label'>Número do Cartão</label>");
+        out.println("    <input type='text' class='form-control' name='numeroCartao' pattern='\\d{16}' maxlength='16' placeholder='xxxx xxxx xxxx xxxx' required>");
+        out.println("  </div>");
+        out.println("  <div class='col-md-4'>");
+        out.println("    <label class='form-label'>CVV</label>");
+        out.println("    <input type='text' class='form-control' name='cvv' pattern='\\d{3,4}' maxlength='3' placeholder='123' required>");
+        out.println("  </div>");
+        out.println("</div>");
         out.println("<button type='submit' class='btn btn-success w-100'>Confirmar Compra</button>");
         out.println("</form></div></div>");
 
@@ -276,7 +285,16 @@ public class ListaITSServlet extends HttpServlet {
         out.println("  form.innerHTML = `");
         out.println("    <div class='mb-3'><label class='form-label'>Nome Completo</label><input type='text' class='form-control' name='nomeCliente' required></div>");
         out.println("    <div class='mb-3'><label class='form-label'>Endereço Completo</label><input type='text' class='form-control' name='endereco' required></div>");
-        out.println("    <div class='mb-3'><label class='form-label'>Número do Cartão</label><input type='text' class='form-control' name='numeroCartao' pattern='\\\\d{16}' maxlength='16' placeholder='1234 5678 9012 3456' required></div>");
+        out.println("<div class='row mb-3'>");
+        out.println("  <div class='col-md-8'>");
+        out.println("    <label class='form-label'>Número do Cartão</label>");
+        out.println("    <input type='text' class='form-control' name='numeroCartao' pattern='\\d{16}' maxlength='16' placeholder='xxxx xxxx xxxx xxxx' required>");
+        out.println("  </div>");
+        out.println("  <div class='col-md-4'>");
+        out.println("    <label class='form-label'>CVV</label>");
+        out.println("    <input type='text' class='form-control' name='cvv' pattern='\\d{3,4}' maxlength='3' placeholder='123' required>");
+        out.println("  </div>");
+        out.println("</div>");
         out.println("    <button type='submit' class='btn btn-success w-100'>Confirmar</button>");
         out.println("  `;");
         out.println("  let total = 0;");

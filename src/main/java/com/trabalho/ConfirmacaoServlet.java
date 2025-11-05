@@ -65,7 +65,7 @@ public class ConfirmacaoServlet extends HttpServlet {
         out.println("<small>Av. 24 de Julho, NAMPULA<br>NAMPULA - CIDADE<br>N.U.I.T. 40190268</small></div><hr>");
         out.println("<div class='d-flex justify-content-between'><small>Data: " + data + " " + hora + "</small><small>Caixa: 2</small></div>");
         out.println("<small>Nº doc: " + docNum + "</small><br><small>Nome: CLIENTE GERAL</small><hr>");
-
+        
         List<ItemCompra> itens = new ArrayList<>();
         double total = 0.0;
 
@@ -126,6 +126,8 @@ public class ConfirmacaoServlet extends HttpServlet {
         out.println("  });");
         out.println("}");
         out.println("</script>");
+        out.println("<div class='d-flex gap-2 justify-content-center'>");
+        out.println("<a href='" + req.getContextPath() + "/' class='btn btn-primary'><i class='fas fa-home'></i> Voltar</a> </div>");
         out.println("</body></html>");
     }
 
