@@ -31,8 +31,9 @@ public class ConfirmacaoServlet extends HttpServlet {
         String numeroCartao = req.getParameter("numeroCartao");
         String totalStr = req.getParameter("total");
 
-        String cartaoMascarado = (numeroCartao != null && numeroCartao.matches("\\d{16}"))
-            ? "**** **** **** " + numeroCartao.substring(12)
+        String numeroCartaoLimpo = numeroCartao != null ? numeroCartao.replaceAll("\\D", "") : "";
+        String cartaoMascarado = (numeroCartaoLimpo.length() == 16)
+            ? "**** **** **** " + numeroCartaoLimpo.substring(12)
             : "**** **** **** XXXX";
 
         ZonedDateTime agora = ZonedDateTime.now(ZoneId.of("Africa/Maputo"));
@@ -103,7 +104,7 @@ public class ConfirmacaoServlet extends HttpServlet {
         }
         out.println("</tbody></table><hr>");
         out.println("<div class='d-flex justify-content-between'><strong>Total Venda:</strong> <strong>" + String.format("%.2f", total) + " MT</strong></div>");
-        out.println("<div class='d-flex justify-content-between'><strong>TOTAL OFERTADO</strong> <strong>" + String.format("%.2f", total) + " MT</strong></div>");
+        out.println("<div class='d-flex justify-content-between'><strong>TOTAL OFERTADO</strong> <strong>" + String.format("%.2f", total-total) + " MT</strong></div>");
         out.println("<div class='d-flex justify-content-between'><strong>CARTÃO</strong> <strong>" + String.format("%.2f", total) + " MT</strong></div><hr>");
 
         out.println("<small><strong>Cliente:</strong> " + (nomeCliente != null ? nomeCliente : "Anônimo") + "</small><br>");
